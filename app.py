@@ -29,26 +29,7 @@ if st.button("Analyser le message"):
         # 1. Prétraitement simple (identique à l'entraînement)
         clean_text = message_input.lower()
         clean_text = re.sub(r'[^a-z0-9\s]', '', clean_text)
-
-        #TEST INJECTION DICTIONNAIRE FR ET MLG
-        # Liste de mots suspects en FR et MG
-        french_spam_keywords = ["gagné", "félicitations", "loka", "antsoy", "cadeau", "urgent", "cliquez", "lotery"]
-
-        # Vérification manuelle (Bonus : Robustesse)
-        is_manual_spam = any(word in message_input.lower() for word in french_spam_keywords)
-
-        # Prédiction IA
-        vectorized_text = vectorizer.transform([clean_text])
-        probabilities = model.predict_proba(vectorized_text)[0]
-        spam_probability = probabilities[1]
-
-        # Si un mot clé est trouvé, on booste la probabilité
-        if is_manual_spam:
-            spam_probability = max(spam_probability, 0.85)
-
-    #FIN DU TEST
-    #    probabilities = model.predict_proba(vectorized_text)[0]
-    #   spam_probability = probabilities[1] # Probabilité de la classe 1 (Spam)       
+    
         # 4. Application du seuil
         is_spam = spam_probability >= threshold
         
