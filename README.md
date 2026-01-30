@@ -1,4 +1,4 @@
-ystème de Détection de Spam SMS - ISPM
+Système de Détection de Spam SMS - ISPM
 
 Institut Supérieur Polytechnique de Madagascar http://www.ispm-edu.com
 
