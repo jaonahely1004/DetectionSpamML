@@ -1,6 +1,15 @@
 import streamlit as st
 import joblib
 import re
+import numpy as np
+from scipy.sparse import hstack, csr_matrix
+
+def add_manual_features(texts):
+    digits = [sum(c.isdigit() for c in t) for t in texts]
+    symbols = [sum(c in "!$€" for c in t) for t in texts]
+    length = [len(t) for t in texts]
+    return np.array([digits, symbols, length]).T
+
 # Configuration de la page
 st.set_page_config(page_title="Détecteur de Spam - ISPM", page_icon="🚫")
 
@@ -29,7 +38,29 @@ if st.button("Analyser le message"):
         # 1. Prétraitement simple (identique à l'entraînement)
         clean_text = message_input.lower()
         clean_text = re.sub(r'[^a-z0-9\s]', '', clean_text)
-    
+
+        #TEST INJECTION DICTIONNAIRE FR ET MLG
+        # Liste de mots suspects en FR et MG
+        french_spam_keywords = ["gagné", "félicitations", "loka", "antsoy", "cadeau", "urgent", "cliquez", "lotery"]
+
+        # Vérification manuelle (Bonus : Robustesse)
+        is_manual_spam = any(word in message_input.lower() for word in french_spam_keywords)
+
+        # Prédiction IA
+        tfidf_vec = vectorizer.transform([clean_text])
+        manual_vec = csr_matrix(add_manual_features([clean_text]))
+        final_vec = hstack([tfidf_vec, manual_vec])
+
+        probabilities = model.predict_proba(final_vec)[0]
+        spam_probability = probabilities[1]
+
+        # Si un mot clé est trouvé, on booste la probabilité
+        if is_manual_spam:
+            spam_probability = max(spam_probability, 0.85)
+
+    #FIN DU TEST
+    #    probabilities = model.predict_proba(vectorized_text)[0]
+    #   spam_probability = probabilities[1] # Probabilité de la classe 1 (Spam)       
         # 4. Application du seuil
         is_spam = spam_probability >= threshold
         
